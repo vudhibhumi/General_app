@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตอบแชทลูกค้า - กัลยา ณ มิสต์ โฮมสเตย์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <header class="bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="text-center sm:text-left">
+                <h1 class="text-xl font-bold tracking-wide">กัลยา ณ มิสต์ โฮมสเตย์ เขาค้อ</h1>
+                <p class="text-xs text-teal-100 mt-0.5">ระบบจัดการและคัดลอกข้อความตอบกลับลูกค้าสำหรับมือถือ</p>
+            </div>
+            <div class="text-xs bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                📞 084-879-5501
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+            <label for="categorySelect" class="block text-sm font-semibold text-slate-700 mb-2">
+                📌 เลือกหมวดหมู่เรื่องที่ลูกค้าสอบถาม:
+            </label>
+            <select id="categorySelect" onchange="filterQuestions()" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-base rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-all outline-none cursor-pointer">
+                <option value="all">🌐 แสดงคำถามทั้งหมด</option>
+                <option value="greeting">1. ทักทาย / แนะนำที่พัก / ปิดท้าย</option>
+                <option value="contact">2. ข้อมูลติดต่อและช่องทางติดตาม</option>
+                <option value="rooms">3. ประเภทบ้านพัก / ราคา / เด็ก / ที่นอนเสริม</option>
+                <option value="facilities">4. สิ่งอำนวยความสะดวก / อาหารเช้า / ปิ้งย่าง</option>
+                <option value="mookata">5. บริการสั่งหมูกระทะ</option>
+                <option value="booking">6. การจอง / โอนมัดจำ / สิทธิ์การจอง</option>
+                <option value="rules">7. เช็กอิน-เช็กเอาต์ / กฎที่พัก / การทำอาหาร</option>
+                <option value="location">8. ทำเล / หมอก / การเดินทาง / ที่เที่ยว</option>
+                <option value="status">9. กรณีพิเศษ (ห้องเต็ม / ราคาเปลี่ยน)</option>
+                <option value="map">10. พิกัด ที่พัก Google Map</option>
+            </select>
+        </div>
+
+        <div id="qaContainer" class="space-y-4">
+            </div>
+
+    </main>
+
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-sm px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2 z-50">
+        📋 คัดลอกข้อความไปยังคลิปบอร์ดแล้ว!
+    </div>
+
+    <script>
+        const qaData = [
+    {
+        "id":  1,
+        "category":  "greeting",
+        "question":  "ข้อความทักทายลูกค้า",
+        "answer":  "สวัสดีค่ะ กัลยา ณ มิสต์ โฮมสเตย์ เขาค้อ ยินดีให้บริการค่ะ\n\nลูกค้าสนใจเข้าพักช่วงวันไหน และเข้าพักทั้งหมดกี่ท่านคะ ทางที่พักจะช่วยเช็กห้องว่างและแจ้งรายละเอียดให้ค่ะ\n\nที่พักของเรามีบ้านพักหลายแบบ สำหรับ 2 ท่าน, 4 ท่าน และ 6 ท่านค่ะ"
+    },
+    {
+        "id":  2,
+        "category":  "greeting",
+        "question":  "ข้อความแนะนำที่พักแบบสั้น",
+        "answer":  "ขอฝากที่พักสบาย ๆ ในสายหมอกไว้พิจารณานะคะ\n\nกัลยา ณ มิสต์ โฮมสเตย์ เขาค้อ เป็นที่พักบรรยากาศดี โปร่งโล่งสบาย ใกล้แหล่งท่องเที่ยว มีบ้านพักสำหรับ 2 ท่าน, 4 ท่าน และ 6 ท่านค่ะ\n\nพร้อมอาหารเช้า ห้องน้ำในตัว ปิ้งย่างได้ ฟรี Wi-Fi และมีบริการสั่งหมูกระทะค่ะ\n\nสนใจสอบถามห้องว่างหรือขอรายละเอียดเพิ่มเติมได้เลยนะคะ ยินดีให้บริการค่ะ"
+    },
+    {
+        "id":  3,
+        "category":  "greeting",
+        "question":  "Post ในกลุ่ม เขาค้อ ภูทับเบิก จ.เพชรบูรณ์",
+        "answer":  "สมาชิก: KPP 2️⃣0️⃣7️⃣\n\n🏡 บ้านพักสบายมีตั้งแต่ สำหรับ 2 ท่าน 4 ท่าน และ 6 ท่าน\n👍 ใกล้ที่เที่ยว\n👍 บรรยากาศดี โปร่งโล่งสบาย\n🤟 พร้อมอาหารเช้า, ห้องน้ำในตัว, ปิ้งย่างได้, ฟรี Wi-Fi\n\n☎️ เยี่ยมชมเพจ inbox ขอรายละเอียด หรือโทรติดต่อสอบถาม 084-8795 501 ได้เลยนะคะ\n👍 วีดีโอคอลได้ค่ะ"
+    },
+    {
+        "id":  4,
+        "category":  "contact",
+        "question":  "ข้อมูลติดต่อและช่องทางติดตาม",
+        "answer":  "แจ้งข้อมูลติดต่อและช่องทางติดตามของที่พักนะคะ\n\nกัลยา ณ มิสต์ โฮมสเตย์ เขาค้อ\nโทร. 084-879-5501\nFacebook: https://www.facebook.com/kanlayanamist.khaokho\nพิกัด Google Maps: https://maps.app.goo.gl/Xgdv5HAJqfVKkTC8A\n\nที่อยู่: 170 หมู่ 6 รัตนัย ต.เขาค้อ อ.เขาค้อ จ.เพชรบูรณ์ 67270\n\nสอบถามเพิ่มเติมได้เลยนะคะ ยินดีให้บริการค่ะ"
+    },
+    {
+        "id":  5,
+        "category":  "rooms",
+        "question":  "บ้านพักสำหรับ 2 ท่าน",
+        "answer":  "บ้านพักสำหรับ 2 ท่าน\n\n- แอร์\n- ห้องน้ำในตัว\n- ราคา 800 บาทค่ะ\n- รวมอาหารเช้า"
+    },
+    {
+        "id":  6,
+        "category":  "rooms",
+        "question":  "บ้านพักสำหรับ 4 ท่าน",
+        "answer":  "บ้านพักสำหรับ 4 ท่าน\n\n- แอร์\n- ห้องน้ำในตัว\n- ราคา 1400 บาทค่ะ\n- รวมอาหารเช้า"
+    },
+    {
+        "id":  7,
+        "category":  "rooms",
+        "question":  "บ้านพักสำหรับ 6 ท่าน",
+        "answer":  "บ้านพักสำหรับ 4-6 ท่าน\n\n- 2 ห้องนอน\n- 1 ห้องน้ำ\n- แอร์+พัดลม\n- ราคา 2200 บาทค่ะ\n- รวมอาหารเช้า"
+    },
+    {
+        "id":  8,
+        "category":  "rooms",
+        "question":  "เด็กและที่นอนเสริม",
+        "answer":  "สำหรับเด็กไม่เกิน 12 ปี ทางที่พักไม่คิดเงินเพิ่มค่ะ หากลูกค้าเตรียมที่นอนให้น้องเองนะคะ\n\nหากต้องการใช้ที่นอนเสริมของที่พัก ขนาด 3.5 ฟุต จะมีค่าใช้จ่ายเพิ่มเติมค่ะ"
+    },
+    {
+        "id":  9,
+        "category":  "facilities",
+        "question":  "รายการอาหารเช้า",
+        "answer":  "อาหารเช้าของที่พักมี\n\n- ข้าวต้ม\n- ไส้กรอก\n- ไข่ต้ม หรือไข่ดาว\n- กาแฟ / โอวัลติน\n\nรวมอยู่ในราคาห้องพักเรียบร้อยแล้วค่ะ"
+    },
+    {
+        "id":  10,
+        "category":  "facilities",
+        "question":  "สิ่งที่รวมในที่พัก",
+        "answer":  "สิ่งอำนวยความสะดวก\n\n- Wi-Fi ฟรี\n- ทีวีสัญญาณดาวเทียม (บ้าน 4 ท่าน และ 6 ท่าน)\n- เครื่องทำน้ำอุ่น\n- น้ำดื่มท่านละ 1 ขวด\n- กระติกต้มน้ำร้อน\n- แก้วน้ำ / ถ้วยกาแฟ\n- กาแฟ / โอวัลติน\n- ผ้าเช็ดตัว\n- ครีมอาบน้ำ / ยาสระผม\n\nทางที่พักเตรียมไว้ให้ตามรายการนี้ค่ะ"
+    },
+    {
+        "id":  11,
+        "category":  "facilities",
+        "question":  "บริการอุปกรณ์ปิ้งย่าง",
+        "answer":  "ที่พักสามารถปิ้งย่างได้ค่ะ โดยมีอุปกรณ์ให้ดังนี้นะคะ\n\n- มีเตาปิ้งย่างให้ใช้ฟรี\n- มีถ่านให้ใช้ฟรี\n- มีน้ำแข็งให้ใช้ฟรี\n- มีบริการสั่งหมูกระทะ\n\nลูกค้าสามารถแจ้งล่วงหน้าได้เลยค่ะ ทางที่พักจะช่วยเตรียมความพร้อมให้นะคะ"
+    },
+    {
+        "id":  12,
+        "category":  "mookata",
+        "question":  "หมูกระทะ",
+        "answer":  "ที่พักมีบริการสั่งหมูกระทะให้ค่ะ\n\n- ชุดเล็ก ราคา 350 บาท\n- ชุดใหญ่ ราคา 550 บาท"
+    },
+    {
+        "id":  13,
+        "category":  "booking",
+        "question":  "การจองและการชำระเงิน",
+        "answer":  "หากลูกค้าต้องการจองห้องพัก ทางที่พักขอมัดจำ 50% เพื่อยืนยันการจองค่ะ\n\nบัญชีสำหรับโอนมัดจำ\nธนาคารกรุงศรีอยุธยา\nเลขที่บัญชี: 688-118-1879\nชื่อบัญชี: กัลยา พาอั้ง\n\nหลังโอนแล้ว รบกวนส่งสลิปหลักฐานการโอน พร้อมแจ้งชื่อผู้จองและเบอร์ติดต่อด้วยนะคะ ทางที่พักจะบันทึกการจองให้ค่ะ"
+    },
+    {
+        "id":  14,
+        "category":  "booking",
+        "question":  "ข้อความแจ้งเรื่องสิทธิ์การจอง",
+        "answer":  "เรียนท่านลูกค้า ตอนนี้ห้องพักยังว่างอยู่ค่ะ\n\nหากลูกค้ายังไม่ตัดสินใจจอง ทางที่พักขอสงวนสิทธิ์ในการปล่อยห้องพักให้กับลูกค้าท่านที่ตัดสินใจและโอนมัดจำก่อนนะคะ\n\nทางเราใช้ระบบ “โอนก่อนได้ห้องก่อน” ค่ะ ก่อนโอนกรุณาสอบถามห้องว่างอีกครั้งนะคะ"
+    },
+    {
+        "id":  15,
+        "category":  "rules",
+        "question":  "เช็กอิน / เช็กเอาต์",
+        "answer":  "แจ้งเวลาเช็กอินและเช็กเอาต์ของที่พักนะคะ\n\nCheck-in: 14.00-20.00 น.\nCheck-out: 06.00-11.30 น.\n\nหากลูกค้าต้องการเข้าเช็กอินช้าหรือเร็วกว่ากำหนด กรุณาแจ้งทางที่พักล่วงหน้านะคะ"
+    },
+    {
+        "id":  16,
+        "category":  "rules",
+        "question":  "กฎของที่พัก",
+        "answer":  "เพื่อความสะดวกสบายของลูกค้าทุกท่าน ทางที่พักขอความร่วมมือดังนี้ค่ะ\n\n- ไม่อนุญาตให้นำสัตว์เลี้ยงเข้าพัก\n- ไม่สูบบุหรี่ในห้องพัก/ห้องน้ำ\n- ไม่ส่งเสียงดังรบกวนผู้อื่น\n- ไม่นำอาหารที่มีกลิ่นแรงเข้าไปรับประทานในห้องพัก\n- หากต้องการใช้เตาไฟฟ้าหรือเครื่องอบอาหารไฟฟ้า กรุณาแจ้งทางที่พักก่อน\n- ห้ามนำสิ่งผิดกฎหมายเข้ามาในพื้นที่ที่พัก\n\nขอบคุณลูกค้าที่ให้ความร่วมมือนะคะ"
+    },
+    {
+        "id":  17,
+        "category":  "rules",
+        "question":  "การทำอาหาร / เครื่องใช้ไฟฟ้า",
+        "answer":  "บ้านพักไม่มีครัวและไม่มีเครื่องครัวสำหรับประกอบอาหารนะคะ แต่สามารถทำอาหารประเภทปิ้งย่างได้บริเวณหน้าบ้านพักค่ะ\n\nลูกค้าสามารถนำของสดมาปิ้งย่างได้ หรือสั่งหมูกระทะมาทานที่ที่พักได้ค่ะ\n\nหากต้องการใช้อุปกรณ์ไฟฟ้าเพิ่มเติม รบกวนแจ้งทางที่พักก่อนนะคะ"
+    },
+    {
+        "id":  18,
+        "category":  "location",
+        "question":  "ข้อมูลทำเลและบรรยากาศ",
+        "answer":  "ที่พักอยู่บริเวณอ่างเก็บน้ำรัตนัย ต.เขาค้อค่ะ\n\nหากมองจากจุดชมวิวลงมา ที่พักจะอยู่ด้านล่างอีกฝั่งของอ่างเก็บน้ำค่ะ\n\nบรรยากาศสบาย ๆ โปร่งโล่ง ไม่แออัด เหมาะสำหรับพักผ่อนแบบเรียบง่ายค่ะ"
+    },
+    {
+        "id":  19,
+        "category":  "location",
+        "question":  "การเดินทางขึ้นเขาค้อ",
+        "answer":  "การเดินทางมาเขาค้อขับรถไม่ยากค่ะ ไม่ชันเหมือนภูทับเบิกนะคะ\n\nที่พักอยู่บริเวณอ่างเก็บน้ำรัตนัย เป็นพื้นที่ราบระหว่างหุบเขา ขามาจะมีช่วงลงเขา และขากลับมีช่วงขึ้นเขาชันเล็กน้อยเพียงระยะสั้น ๆ ค่ะ\n\nโดยรวมสามารถขับรถมาได้สบายค่ะ"
+    },
+    {
+        "id":  20,
+        "category":  "location",
+        "question":  "สถานที่ท่องเที่ยวใกล้ที่พัก",
+        "answer":  "ที่พักอยู่ใกล้แหล่งท่องเที่ยวหลายแห่งค่ะ เดินทางค่อนข้างสะดวกนะคะ\n\n- สวนสัตว์เขาค้อ ประมาณ 2 กม.\n- จุดชมวิวแทนรักทะเลหมอก ประมาณ 3 กม.\n- น้ำตกศรีดิษฐ์ ประมาณ 3 กม.\n- อเมซิ่งไดโนเสาร์ ประมาณ 6 กม.\n- อาราบิก้า ณ เขาค้อ ประมาณ 7 กม.\n- จุดชมวิวไปรษณีย์ ประมาณ 8 กม.\n- จุดชมวิวเขาค้อ ประมาณ 9 กม.\n- ทุ่งดอกไม้ไฮเดรนเยีย คาเฟ่เขาค้อ ประมาณ 10 กม.\n- ทุ่งดอกไม้ฟลาวเวอร์เทอเรส ประมาณ 12 กม.\n- ทุ่งกังหันลม ประมาณ 13 กม.\n- ม่อนแกะเขาค้อ ประมาณ 14 กม.\n- CEDAR ป่าสน CAFÉ ประมาณ 15 กม.\n- จุดชมวิวเขาตะเคียนโง๊ะ ประมาณ 15 กม.\n- ฟูจิแคมป์เขาค้อ ประมาณ 16 กม.\n- ทุ่งแสลงหลวง ประมาณ 18 กม.\n- ไร่องุ่นคุณนนท์ ประมาณ 19 กม.\n- พระตำหนักเขาค้อ ประมาณ 21 กม.\n- วัดผาซ่อนแก้ว ประมาณ 24 กม. หรือขับรถประมาณ 30 นาที\n- ท้าวเวสสุวรรณลอยฟ้า วัดป่าคาสามัคคี ประมาณ 24 กม.\n- พิโนลาเต้ ประมาณ 25 กม.\n- วิลลา ป่าสน ประมาณ 27 กม.\n- เขาเหลียงซาน ประมาณ 30 กม.\n\nระยะทางเป็นระยะโดยประมาณนะคะ"
+    },
+    {
+        "id":  21,
+        "category":  "location",
+        "question":  "คำตอบเมื่อลูกค้าถามเรื่องหมอก",
+        "answer":  "ที่พักอยู่บริเวณอ่างเก็บน้ำรัตนัย ซึ่งเป็นโซนที่มีโอกาสเกิดหมอกค่ะ\n\nแต่หมอกจะมีหรือไม่ ขึ้นอยู่กับสภาพอากาศในแต่ละวันนะคะ\n\nหากวันไหนมีหมอก ลูกค้าสามารถชมบรรยากาศหมอกใกล้ที่พัก หรือไปจุดชมวิวใกล้ ๆ เช่น แทนรักทะเลหมอก จุดชมวิวไปรษณีย์ หรือจุดชมวิวเขาค้อได้ค่ะ"
+    },
+    {
+        "id":  22,
+        "category":  "status",
+        "question":  "คำตอบเมื่อลูกค้าถามว่าห้องเต็มหรือไม่",
+        "answer":  "ขออภัยค่ะ วันที่ลูกค้าสอบถาม ห้องพักเต็มแล้วนะคะ\n\nหากลูกค้ามีวันอื่นที่สะดวก สามารถแจ้งมาได้เลยค่ะ ทางเรายินดีช่วยเช็กห้องว่างให้อีกครั้งนะคะ"
+    },
+    {
+        "id":  23,
+        "category":  "status",
+        "question":  "คำตอบเมื่อราคามีการเปลี่ยนแปลง",
+        "answer":  "เรียนลูกค้าค่ะ เนื่องจากราคาห้องพักอาจมีการปรับเปลี่ยนตามช่วงวันเข้าพัก วันหยุด หรือเทศกาล ทางที่พักขอแจ้งว่าราคาที่เคยแจ้งไว้ก่อนหน้านี้อาจไม่สามารถใช้ได้แล้วนะคะ\n\nต้องขออภัยในความไม่สะดวกค่ะ หากลูกค้ายังสนใจเข้าพัก กรุณาแจ้งวันที่ต้องการเข้าพักอีกครั้ง ทางเราจะเช็กราคาและห้องว่างล่าสุดให้ค่ะ"
+    },
+    {
+        "id":  24,
+        "category":  "map",
+        "question":  "ขอ location/Map",
+        "answer":  "แนบลิงก์ Google Map ที่พักค่ะ\n\nhttps://maps.app.goo.gl/Xgdv5HAJqfVKkTC8A\n\nลูกค้าสามารถกดลิงก์เพื่อดูเส้นทางได้เลยนะคะ"
+    }
+];
+
+        function renderCards(data) {
+            const container = document.getElementById('qaContainer');
+            container.innerHTML = '';
+
+            if(data.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm">ไม่พบข้อมูลคำถามในหมวดหมู่ที่เลือก</div>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-200 hover:shadow-md";
+                card.innerHTML = `
+                    <div class="bg-slate-50 px-5 py-3.5 border-b border-slate-100 flex justify-between items-center gap-3">
+                        <span class="font-medium text-slate-800 text-sm sm:text-base">🙋 ${item.question}</span>
+                        <span class="text-[10px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded font-medium shrink-0 uppercase tracking-wider">${item.category}</span>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <textarea id="hidden-textarea-${item.id}" style="position:absolute; left:-9999px; top:-9999px;">${item.answer}</textarea>
+                        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs sm:text-sm whitespace-pre-line leading-relaxed overflow-x-auto select-all" id="text-${item.id}">${item.answer}</div>
+                        <button onclick="copyToClipboard(${item.id})" class="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-medium py-2.5 px-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 outline-none focus:ring-2 focus:ring-teal-500">
+                            📋 คัดลอกข้อความไปตอบแชท
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterQuestions() {
+            const select = document.getElementById('categorySelect');
+            const selectedValue = select.value;
+
+            if(selectedValue === 'all') {
+                renderCards(qaData);
+            } else {
+                const filtered = qaData.filter(item => item.category === selectedValue);
+                renderCards(filtered);
+            }
+        }
+
+        // ฟังก์ชันระบบคัดลอกข้อความเวอร์ชันอัปเกรดใหม่ ทลายกำแพงระบบ Security ของไฟล์เครื่อง
+        function copyToClipboard(id) {
+            const hiddenTextArea = document.getElementById(`hidden-textarea-${id}`);
+            
+            // ใช้เทคนิคย้าย Focus และสั่งไฮไลท์ข้อความในวัตถุจำลอง จากนั้นก๊อปปี้ผ่านคำสั่งระบบเก่า
+            hiddenTextArea.select();
+            hiddenTextArea.setSelectionRange(0, 99999); // รองรับสำหรับมือถือ
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast();
+                    return;
+                }
+            } catch (err) {
+                console.log("ExecCommand Failed, trying Clipboard API...");
+            }
+
+            // หากวิธีแรกไม่ผ่าน (กรณีเบราว์เซอร์ล้ำมากๆ) จะรันระบบปกติสำรองให้
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(hiddenTextArea.value).then(() => {
+                    showToast();
+                });
+            } else {
+                // หากพลาดหมดจริงๆ จะแจ้งเตือนให้แตะค้างที่กล่องดำ
+                alert('โปรดใช้นิ้วแตะค้างที่กล่องข้อความสีดำ เพื่อกดคัดลอกด้วยตนเองค่ะ');
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+            }, 2000);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            renderCards(qaData);
+        });
+    </script>
+</body>
+</html>
