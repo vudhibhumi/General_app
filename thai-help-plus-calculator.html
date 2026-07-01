@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>เครื่องคำนวณสิทธิไทยช่วยไทยพลัส</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --good-bg: #ecfdf5;
+      --good: #047857;
+      --warn-bg: #fff7ed;
+      --warn: #c2410c;
+      --danger-bg: #fef2f2;
+      --danger: #b91c1c;
+      --info-bg: #eff6ff;
+      --info: #1d4ed8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--info-bg);
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      margin: 0 0 6px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin: -2px 0 8px;
+    }
+
+    .input-row { margin-bottom: 14px; }
+
+    .money-input { position: relative; }
+
+    .money-input span {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 14px 13px 38px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: 17px;
+      outline: none;
+      background: #fff;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 0.42fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .primary:active { background: var(--accent-dark); }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .result-status {
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .ok {
+      background: var(--good-bg);
+      color: var(--good);
+      border: 1px solid #bbf7d0;
+    }
+
+    .need {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border: 1px solid #fed7aa;
+    }
+
+    .danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .info {
+      background: var(--info-bg);
+      color: var(--info);
+      border: 1px solid #bfdbfe;
+    }
+
+    .grid { display: grid; gap: 10px; }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      padding: 11px 0;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .row:last-child { border-bottom: 0; }
+
+    .row .name {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .row .value {
+      font-size: 18px;
+      font-weight: 900;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      font-weight: 900;
+      font-size: 16px;
+      margin: 2px 0 10px;
+    }
+
+    .note {
+      margin-top: 10px;
+      padding: 12px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-size: 13px;
+      color: #4b5563;
+    }
+
+    .formula {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .hidden { display: none; }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 380px) {
+      h1 { font-size: 21px; }
+      .buttons { grid-template-columns: 1fr; }
+      .row {
+        flex-direction: column;
+        gap: 2px;
+      }
+      .row .value { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="header">
+      <div class="badge">60% รัฐช่วย / 40% เราจ่าย</div>
+      <h1>คำนวณสิทธิไทยช่วยไทยพลัส</h1>
+      <p class="subtitle">ตรวจว่าเงินในวอลเล็ตพอซื้อสินค้านี้ตามสิทธิ 60:40 หรือไม่ และต้องเติมเพิ่มเท่าไหร่</p>
+    </section>
+
+    <section class="card">
+      <div class="input-row">
+        <label for="wallet">เงินในวอลเล็ต</label>
+        <p class="hint">เงินของเราในบัญชีที่มีอยู่ตอนนี้</p>
+        <div class="money-input">
+          <span>฿</span>
+          <input id="wallet" type="number" inputmode="decimal" min="0" step="0.01" placeholder="เช่น 100" />
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label for="rightToday">สิทธิไทยช่วยไทยพลัส: มูลค่าคงเหลือวันนี้</label>
+        <p class="hint">เงินสนับสนุนจากรัฐคงเหลือวันนี้ ปกติไม่เกิน 200 บาท/วัน</p>
+        <div class="money-input">
+          <span>฿</span>
+          <input id="rightToday" type="number" inputmode="decimal" min="0" max="200" step="0.01" placeholder="เช่น 200" />
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label for="price">ราคาสินค้า</label>
+        <p class="hint">ยอดรวมสินค้าที่ต้องการซื้อ</p>
+        <div class="money-input">
+          <span>฿</span>
+          <input id="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="เช่น 333.33" />
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="primary" onclick="calculate()">คำนวณ</button>
+        <button class="secondary" onclick="resetForm()">ล้างค่า</button>
+      </div>
+
+      <div class="formula">
+        คำนวณเป็นหน่วยสตางค์ | รัฐช่วย 60% และเราจ่าย 40% เท่านั้น
+      </div>
+    </section>
+
+    <section id="resultCard" class="card hidden">
+      <div id="statusBox" class="result-status"></div>
+
+      <div class="section-title">ข้อมูลที่ใช้คำนวณ</div>
+      <div class="grid">
+        <div class="row">
+          <div class="name">ราคาสินค้า</div>
+          <div class="value" id="outPrice">-</div>
+        </div>
+        <div class="row">
+          <div class="name">เงินในวอลเล็ตตอนนี้</div>
+          <div class="value" id="outWallet">-</div>
+        </div>
+      </div>
+
+      <div id="enoughBox" class="hidden">
+        <div class="section-title" style="margin-top:16px;">เงินพอสำหรับค่าสินค้านี้</div>
+        <div class="grid">
+          <div class="row">
+            <div class="name">รัฐช่วย 60%</div>
+            <div class="value" id="outGovPay">-</div>
+          </div>
+          <div class="row">
+            <div class="name">เราจ่ายเอง 40%</div>
+            <div class="value" id="outUserPay">-</div>
+          </div>
+        </div>
+        <div class="note" id="enoughExplainBox"></div>
+      </div>
+
+      <div id="notEnoughCanTopupBox" class="hidden">
+        <div class="section-title" style="margin-top:16px;">เงินยังไม่พอ แต่เติมให้พอดีกับราคาสินค้าได้</div>
+        <div class="grid">
+          <div class="row use-now-wallet-row">
+            <div class="name">หากคุณต้องการใช้สิทธิคนละครึ่งตอนนี้ คุณสามารถชำระได้</div>
+            <div class="value" id="outUseNowCanPayCanTopup">-</div>
+          </div>
+          <div class="row use-now-wallet-row">
+            <div class="name">และจะต้องจ่ายเพิ่มเองอีกต่างหาก</div>
+            <div class="value" id="outExtraSelfPayCanTopup">-</div>
+          </div>
+          <div class="row">
+            <div class="name">สถานะปัจจุบันสามารถจ่ายค่าสินค้าได้</div>
+            <div class="value" id="outCurrentBuyPowerCanTopup">-</div>
+          </div>
+          <div class="row">
+            <div class="name">เงินเรา 40% ของสินค้านี้ ที่ไม่ต้องจ่ายเพิ่มเองต่างหาก</div>
+            <div class="value" id="outNeededUser40CanTopup">-</div>
+          </div>
+          <div class="row">
+            <div class="name">ต้องเติมเงินเพิ่ม</div>
+            <div class="value" id="outTopupForPrice">-</div>
+          </div>
+        </div>
+        <div class="note" id="notEnoughCanTopupExplainBox"></div>
+      </div>
+
+      <div id="notEnoughRightLimitBox" class="hidden">
+        <div class="section-title" style="margin-top:16px;">สิทธิวันนี้ไม่พอกับราคาสินค้านี้</div>
+        <div class="grid">
+          <div class="row use-now-wallet-row">
+            <div class="name">หากคุณต้องการใช้สิทธิคนละครึ่งตอนนี้ คุณสามารถชำระได้</div>
+            <div class="value" id="outUseNowCanPayLimited">-</div>
+          </div>
+          <div class="row use-now-wallet-row">
+            <div class="name">และจะต้องจ่ายเพิ่มเองอีกต่างหาก</div>
+            <div class="value" id="outExtraSelfPayLimited">-</div>
+          </div>
+          <div class="row">
+            <div class="name">สถานะปัจจุบันสามารถจ่ายค่าสินค้าได้</div>
+            <div class="value" id="outCurrentBuyPowerLimited">-</div>
+          </div>
+          <div class="row">
+            <div class="name">วงเงินเต็มที่ตามสิทธิของคุณวันนี้เหลือแค่</div>
+            <div class="value" id="outMaxPurchaseTodayLimited">-</div>
+          </div>
+        </div>
+        <div class="note" id="notEnoughRightLimitExplainBox"></div>
+      </div>
+
+      <div id="walletFullRightBox" class="hidden">
+        <div class="section-title" style="margin-top:16px;">เงินในวอลเล็ตยังไม่พอใช้สิทธิเต็มวันนี้</div>
+        <div class="grid">
+          <div class="row">
+            <div class="name">สิทธิคนละครึ่งเต็มที่ของคุณวันนี้คือ</div>
+            <div class="value" id="outFullRightTotal">-</div>
+          </div>
+          <div class="row">
+            <div class="name">แต่ต้องมีเงินในวอลเล็ต</div>
+            <div class="value" id="outWalletNeedForFullRight">-</div>
+          </div>
+          <div class="row">
+            <div class="name">ซึ่งจะต้องเติมเงินเพิ่มก่อน</div>
+            <div class="value" id="outWalletTopupForFullRight">-</div>
+          </div>
+        </div>
+        <div class="note" id="walletFullRightExplainBox"></div>
+      </div>
+    </section>
+
+    <div class="footer">
+      เครื่องมือนี้คำนวณตามข้อมูลที่กรอก โดยไม่คำนวณให้เติมเงินเกินส่วน 40% ของสิทธิที่ใช้ได้
+    </div>
+  </main>
+
+  <script>
+    /*
+      คำนวณเป็น "สตางค์" เพื่อป้องกันปัญหาทศนิยมของ JavaScript
+      100 บาท = 10000 สตางค์
+    */
+
+    function toCents(id) {
+      const raw = document.getElementById(id).value.trim();
+      if (raw === "") return 0;
+
+      const cleaned = raw.replace(/,/g, "");
+      const value = Number(cleaned);
+
+      if (!Number.isFinite(value) || value < 0) return 0;
+      return Math.round(value * 100);
+    }
+
+    function moneyFromCents(cents) {
+      const value = cents / 100;
+      return "฿" + value.toLocaleString("th-TH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function hideAllOutputBoxes() {
+      document.getElementById("enoughBox").classList.add("hidden");
+      document.getElementById("notEnoughCanTopupBox").classList.add("hidden");
+      document.getElementById("notEnoughRightLimitBox").classList.add("hidden");
+      document.getElementById("walletFullRightBox").classList.add("hidden");
+    }
+
+    function toggleUseNowWalletRows(show) {
+      document.querySelectorAll(".use-now-wallet-row").forEach(row => {
+        row.classList.toggle("hidden", !show);
+      });
+    }
+
+    function calculatePercentCents(amountCents, percent) {
+      return Math.round(amountCents * percent / 100);
+    }
+
+    function calculate() {
+      const walletCents = toCents("wallet");
+      let rightCents = toCents("rightToday");
+      const priceCents = toCents("price");
+      const dailyLimitCents = 20000;
+
+      if (rightCents > dailyLimitCents) {
+        rightCents = dailyLimitCents;
+        document.getElementById("rightToday").value = "200.00";
+      }
+
+      const resultCard = document.getElementById("resultCard");
+      const statusBox = document.getElementById("statusBox");
+
+      resultCard.classList.remove("hidden");
+      hideAllOutputBoxes();
+      toggleUseNowWalletRows(walletCents > 0);
+
+      setText("outPrice", moneyFromCents(priceCents));
+      setText("outWallet", moneyFromCents(walletCents));
+
+      const maxPurchaseByRightTodayCents = rightCents > 0
+        ? Math.floor(rightCents * 100 / 60)
+        : 0;
+
+      const walletNeedForFullRightCents = Math.round(rightCents * 2 / 3);
+      const walletTopupForFullRightCents = Math.max(0, walletNeedForFullRightCents - walletCents);
+      const walletUnderFullRight40 = rightCents > 0 && walletCents < walletNeedForFullRightCents;
+
+      if (walletUnderFullRight40) {
+        document.getElementById("walletFullRightBox").classList.remove("hidden");
+
+        setText("outFullRightTotal", moneyFromCents(maxPurchaseByRightTodayCents));
+        setText("outWalletNeedForFullRight", moneyFromCents(walletNeedForFullRightCents));
+        setText("outWalletTopupForFullRight", moneyFromCents(walletTopupForFullRightCents));
+
+        document.getElementById("walletFullRightExplainBox").textContent =
+          `สิทธิคนละครึ่งเต็มที่ของคุณวันนี้คือ ${moneyFromCents(maxPurchaseByRightTodayCents)} รวมเงินรัฐช่วยและเงินเรา แต่ต้องมีเงินในวอลเล็ต ${moneyFromCents(walletNeedForFullRightCents)} ซึ่งจะต้องเติมเงินเพิ่มก่อน ${moneyFromCents(walletTopupForFullRightCents)}`;
+      }
+
+      if (priceCents <= 0) {
+        statusBox.className = "result-status need";
+        statusBox.textContent = "กรุณาใส่ราคาสินค้า";
+        return;
+      }
+
+      /*
+        สำหรับราคาสินค้า:
+        รัฐช่วย 60% = ปัดเป็นสตางค์
+        เราจ่าย 40% = ราคาสินค้า - รัฐช่วย
+      */
+      const govNeedForPriceCents = calculatePercentCents(priceCents, 60);
+      const userNeedForPriceCents = priceCents - govNeedForPriceCents;
+
+      /*
+        สิทธิเต็มวันนี้:
+        ถ้ารัฐเหลือ rightCents
+        ยอดซื้อรวมสูงสุดตามสิทธิ = rightCents / 60% = rightCents * 100 / 60
+        เงินเราที่ต้องมี = ยอดซื้อรวม - เงินรัฐ = rightCents * 2 / 3
+      */
+      /*
+        สถานะปัจจุบันสามารถจ่ายค่าสินค้าได้เท่าไหร่แบบ 60:40
+        จำกัดด้วย 2 อย่าง:
+        1) เงินเราในวอลเล็ต / 40%
+        2) สิทธิคงเหลือวันนี้ / 60%
+      */
+      const maxPurchaseByWalletCents = walletCents > 0
+        ? Math.floor(walletCents * 100 / 40)
+        : 0;
+
+      const currentBuyPowerCents = Math.min(maxPurchaseByWalletCents, maxPurchaseByRightTodayCents);
+
+      // Output เพิ่มเติมเฉพาะกรณีเงินไม่พอ:
+      // ใช้สิทธิคนละครึ่งตอนนี้ชำระผ่านสิทธิได้เท่าไหร่
+      // และถ้าจะซื้อสินค้าราคานี้เลย ส่วนที่เหลือต้องจ่ายเองต่างหากเท่าไหร่
+      const useNowCanPayCents = Math.min(currentBuyPowerCents, priceCents);
+      const extraSelfPayCents = Math.max(0, priceCents - useNowCanPayCents);
+
+      const rightEnoughForPrice = govNeedForPriceCents <= rightCents;
+      const walletEnoughForPrice = walletCents >= userNeedForPriceCents;
+
+      /*
+        แสดงเพิ่มเติมทุกกรณี:
+        ถ้าเงินในวอลเล็ตยังไม่ถึงสัดส่วน 40% ของสิทธิเต็มวันนี้
+      */
+      if (walletUnderFullRight40) {
+        document.getElementById("walletFullRightBox").classList.remove("hidden");
+
+        setText("outFullRightTotal", moneyFromCents(maxPurchaseByRightTodayCents));
+        setText("outWalletNeedForFullRight", moneyFromCents(walletNeedForFullRightCents));
+        setText("outWalletTopupForFullRight", moneyFromCents(walletTopupForFullRightCents));
+
+        document.getElementById("walletFullRightExplainBox").textContent =
+          `สิทธิคนละครึ่งเต็มที่ของคุณวันนี้คือ ${moneyFromCents(maxPurchaseByRightTodayCents)} รวมเงินรัฐช่วยและเงินเรา แต่ต้องมีเงินในวอลเล็ต ${moneyFromCents(walletNeedForFullRightCents)} ซึ่งจะต้องเติมเงินเพิ่มก่อน ${moneyFromCents(walletTopupForFullRightCents)}`;
+      }
+
+      /*
+        กรณี 1: เงินปัจจุบันพอ และสิทธิรัฐพอกับราคาสินค้า
+      */
+      if (rightEnoughForPrice && walletEnoughForPrice) {
+        statusBox.className = "result-status ok";
+        statusBox.textContent = "เงินในวอลเล็ตพอสำหรับค่าสินค้านี้ ตามสิทธิ 60:40";
+
+        document.getElementById("enoughBox").classList.remove("hidden");
+
+        setText("outGovPay", moneyFromCents(govNeedForPriceCents));
+        setText("outUserPay", moneyFromCents(userNeedForPriceCents));
+
+        document.getElementById("enoughExplainBox").textContent =
+          `พอสำหรับสินค้าราคา ${moneyFromCents(priceCents)} โดยรัฐช่วย ${moneyFromCents(govNeedForPriceCents)} และเราจ่าย ${moneyFromCents(userNeedForPriceCents)} ตามสัดส่วน 60:40`;
+        return;
+      }
+
+      /*
+        กรณี 2: เงินไม่พอ แต่สิทธิรัฐพอกับราคาสินค้า
+        เติมเงินเฉพาะส่วน 40% แล้วซื้อสินค้านี้ได้พอดี
+      */
+      if (rightEnoughForPrice && !walletEnoughForPrice) {
+        const topupForPriceCents = Math.max(0, userNeedForPriceCents - walletCents);
+
+        statusBox.className = "result-status need";
+        statusBox.textContent = "เงินในวอลเล็ตยังไม่พอ แต่สามารถเติมให้พอดีกับราคาสินค้านี้ได้";
+
+        document.getElementById("notEnoughCanTopupBox").classList.remove("hidden");
+
+        setText("outUseNowCanPayCanTopup", moneyFromCents(useNowCanPayCents));
+        setText("outExtraSelfPayCanTopup", moneyFromCents(extraSelfPayCents));
+        setText("outCurrentBuyPowerCanTopup", moneyFromCents(currentBuyPowerCents));
+        setText("outNeededUser40CanTopup", moneyFromCents(userNeedForPriceCents));
+        setText("outTopupForPrice", moneyFromCents(topupForPriceCents));
+
+        document.getElementById("notEnoughCanTopupExplainBox").textContent =
+          `สถานะปัจจุบันสามารถจ่ายค่าสินค้าได้ ${moneyFromCents(currentBuyPowerCents)} ตามสัดส่วน 60:40 หากต้องการให้พอดีกับราคาสินค้า ${moneyFromCents(priceCents)} จะต้องเติมเงินเพิ่ม ${moneyFromCents(topupForPriceCents)}`;
+        return;
+      }
+
+      /*
+        กรณี 3: สิทธิคงเหลือวันนี้ไม่พอกับราคาสินค้า
+        ไม่คำนวณให้เติมเกินส่วน 40% เพื่อปิดยอดสินค้า
+      */
+      statusBox.className = "result-status danger";
+      statusBox.textContent = "สิทธิคงเหลือวันนี้ไม่พอสำหรับราคาสินค้านี้";
+
+      document.getElementById("notEnoughRightLimitBox").classList.remove("hidden");
+
+      setText("outUseNowCanPayLimited", moneyFromCents(useNowCanPayCents));
+      setText("outExtraSelfPayLimited", moneyFromCents(extraSelfPayCents));
+      setText("outCurrentBuyPowerLimited", moneyFromCents(currentBuyPowerCents));
+      setText("outMaxPurchaseTodayLimited", moneyFromCents(maxPurchaseByRightTodayCents));
+
+      document.getElementById("notEnoughRightLimitExplainBox").textContent =
+        `สถานะปัจจุบันสามารถจ่ายค่าสินค้าได้ ${moneyFromCents(currentBuyPowerCents)} ตามสัดส่วน 60:40 แต่วงเงินเต็มที่ตามสิทธิของคุณวันนี้เหลือแค่ ${moneyFromCents(maxPurchaseByRightTodayCents)} ไม่พอชำระค่าสินค้าราคา ${moneyFromCents(priceCents)}`;
+    }
+
+    function resetForm() {
+      document.getElementById("wallet").value = "";
+      document.getElementById("rightToday").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("resultCard").classList.add("hidden");
+      document.getElementById("wallet").focus();
+    }
+
+    ["wallet", "rightToday", "price"].forEach(id => {
+      document.getElementById(id).addEventListener("input", calculate);
+    });
+  </script>
+</body>
+</html>
