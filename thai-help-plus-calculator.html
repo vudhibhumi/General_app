@@ -421,6 +421,11 @@
       });
     }
 
+    function moneyFromCentsWithWhole(cents, rounder) {
+      const whole = rounder(cents / 100);
+      return `${moneyFromCents(cents)} (${whole.toLocaleString("th-TH")})`;
+    }
+
     function setText(id, value) {
       document.getElementById(id).textContent = value;
     }
@@ -567,9 +572,9 @@
 
         document.getElementById("notEnoughCanTopupBox").classList.remove("hidden");
 
-        setText("outUseNowCanPayCanTopup", moneyFromCents(useNowCanPayCents));
-        setText("outExtraSelfPayCanTopup", moneyFromCents(extraSelfPayCents));
-        setText("outCurrentBuyPowerCanTopup", moneyFromCents(currentBuyPowerCents));
+        setText("outUseNowCanPayCanTopup", moneyFromCentsWithWhole(useNowCanPayCents, Math.floor));
+        setText("outExtraSelfPayCanTopup", moneyFromCentsWithWhole(extraSelfPayCents, Math.ceil));
+        setText("outCurrentBuyPowerCanTopup", moneyFromCentsWithWhole(currentBuyPowerCents, Math.floor));
         setText("outNeededUser40CanTopup", moneyFromCents(userNeedForPriceCents));
         setText("outTopupForPrice", moneyFromCents(topupForPriceCents));
 
@@ -587,10 +592,10 @@
 
       document.getElementById("notEnoughRightLimitBox").classList.remove("hidden");
 
-      setText("outUseNowCanPayLimited", moneyFromCents(useNowCanPayCents));
-      setText("outExtraSelfPayLimited", moneyFromCents(extraSelfPayCents));
-      setText("outCurrentBuyPowerLimited", moneyFromCents(currentBuyPowerCents));
-      setText("outMaxPurchaseTodayLimited", moneyFromCents(maxPurchaseByRightTodayCents));
+      setText("outUseNowCanPayLimited", moneyFromCentsWithWhole(useNowCanPayCents, Math.floor));
+      setText("outExtraSelfPayLimited", moneyFromCentsWithWhole(extraSelfPayCents, Math.ceil));
+      setText("outCurrentBuyPowerLimited", moneyFromCentsWithWhole(currentBuyPowerCents, Math.floor));
+      setText("outMaxPurchaseTodayLimited", moneyFromCentsWithWhole(maxPurchaseByRightTodayCents, Math.floor));
 
       document.getElementById("notEnoughRightLimitExplainBox").textContent =
         `สถานะปัจจุบันสามารถจ่ายค่าสินค้าได้ ${moneyFromCents(currentBuyPowerCents)} ตามสัดส่วน 60:40 แต่วงเงินเต็มที่ตามสิทธิของคุณวันนี้เหลือแค่ ${moneyFromCents(maxPurchaseByRightTodayCents)} ไม่พอชำระค่าสินค้าราคา ${moneyFromCents(priceCents)}`;
